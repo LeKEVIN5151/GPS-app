@@ -2,6 +2,9 @@ import streamlit as st
 import pynmea2
 import folium
 from streamlit_folium import st_folium
+import serial
+from threading import Thread
+import time
 
 # Título principal de la aplicación
 st.title("Aplicación de Servicios")
@@ -69,6 +72,9 @@ elif opcion == "Ubicación G-STAR IV":
             ser = serial.Serial('/dev/ttyUSB0', 4800, timeout=1)  # Configura el puerto y la velocidad de baudios
             while True:
                 line = ser.readline().decode('ascii', errors='replace')
+                print(line)  # Mostrar cada línea en la terminal
+                st.write(f"Trama recibida: {line}")  # Mostrar en la interfaz Streamlit
+
                 if line.startswith("$GPGGA") or line.startswith("$GPRMC"):
                     try:
                         msg = pynmea2.parse(line)
