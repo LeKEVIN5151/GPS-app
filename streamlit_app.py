@@ -5,6 +5,10 @@ from streamlit_folium import st_folium
 import serial
 from threading import Thread
 import time
+<<<<<<< HEAD
+=======
+import requests
+>>>>>>> 96a7518 (version_1.0)
 
 # Título principal de la aplicación
 st.title("Aplicación de Servicios")
@@ -57,18 +61,11 @@ elif opcion == "Ubicación Usuario":
 
 # Sección "Ubicación G-STAR IV"
 elif opcion == "Ubicación G-STAR IV":
-    st.header("Ubicación G-STAR IV")
-    st.write("Visualización en tiempo real de la ubicación del GPS G-STAR IV")
+    API_URL = "http://localhost:5000/location"  # Cambia a tu dominio y puerto si necesario
 
-    # Variables para almacenar las coordenadas en tiempo real
-    if 'latitude' not in st.session_state:
-        st.session_state.latitude = None
-    if 'longitude' not in st.session_state:
-        st.session_state.longitude = None
-
-    # Función para leer datos desde el puerto serial
-    def leer_datos_gps():
+    def obtener_datos_gps():
         try:
+<<<<<<< HEAD
             ser = serial.Serial('/dev/ttyUSB0', 4800, timeout=1)  # Configura el puerto y la velocidad de baudios
             while True:
                 line = ser.readline().decode('ascii', errors='replace')
@@ -91,17 +88,30 @@ elif opcion == "Ubicación G-STAR IV":
     if 'gps_thread' not in st.session_state:
         st.session_state.gps_thread = Thread(target=leer_datos_gps, daemon=True)
         st.session_state.gps_thread.start()
+=======
+            response = requests.get(API_URL)
+            if response.status_code == 200:
+                data = response.json()
+                return data.get("latitude"), data.get("longitude")
+            else:
+                st.error("Error al obtener datos de la API.")
+        except requests.exceptions.RequestException as e:
+            st.error(f"Error de conexión: {e}")
+        return None, None
+>>>>>>> 96a7518 (version_1.0)
 
     # Visualización en Streamlit
     st.title("Aplicación de Ubicación GPS en Tiempo Real")
 
-    # Verifica si hay coordenadas disponibles
-    if st.session_state.latitude and st.session_state.longitude:
-        st.write(f"Latitud: {st.session_state.latitude}")
-        st.write(f"Longitud: {st.session_state.longitude}")
+    # Obtener y mostrar los datos de la ubicación
+    latitude, longitude = obtener_datos_gps()
+
+    if latitude and longitude:
+        st.write(f"Latitud: {latitude}")
+        st.write(f"Longitud: {longitude}")
 
         # Crear un mapa centrado en las coordenadas actuales
-        map_location = [st.session_state.latitude, st.session_state.longitude]
+        map_location = [latitude, longitude]
         map_obj = folium.Map(location=map_location, zoom_start=15)
         folium.Marker(map_location, tooltip="Ubicación Actual").add_to(map_obj)
 

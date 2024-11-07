@@ -3,5 +3,6 @@ pynmea2
 folium
 streamlit_folium
 pyserial
-time
 serial
+requests
+flask
