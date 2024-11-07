@@ -1,3 +1,4 @@
 streamlit
 pynmea2
 folium
+streamlit_folium
