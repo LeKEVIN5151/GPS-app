@@ -2,9 +2,6 @@ import streamlit as st
 import pynmea2
 import folium
 from streamlit_folium import st_folium
-import serial
-from threading import Thread
-import time
 
 # Título principal de la aplicación
 st.title("Aplicación de Servicios")
