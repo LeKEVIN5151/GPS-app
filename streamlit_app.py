@@ -191,32 +191,32 @@ elif opcion == "Análisis Simulador de Vuelo":
 
 
 
-            # map_data = datos_vuelo[["Lat", "Long", "AltMSL"]]
+            map_data = datos_vuelo[["Lat", "Long", "AltMSL"]]
 
-            # # Crear una capa de puntos en 3D
-            # deckgl_layer = pdk.Layer(
-            #     "PointCloudLayer",
-            #     map_data,
-            #     get_position=["Long", "Lat", "AltMSL"],  # Lat, Long, Altitud
-            #     get_radius=0.1,  # Ajusta el tamaño del punto
-            #     get_color=[255, 0, 0],  # Color de los puntos (rojo)
-            #     pickable=True,  # Habilita la selección interactiva de puntos
-            # )
+            # Crear una capa de puntos en 3D
+            deckgl_layer = pdk.Layer(
+                "PointCloudLayer",
+                map_data,
+                get_position=["Long", "Lat", "AltRad"],  # Lat, Long, Altitud
+                get_radius=0.1,  # Ajusta el tamaño del punto
+                get_color=[255, 0, 0],  # Color de los puntos (rojo)
+                pickable=True,  # Habilita la selección interactiva de puntos
+            )
 
-            # # Definir la vista inicial del mapa (en términos de latitud, longitud y zoom)
-            # view_state = pdk.ViewState(
-            #     latitude=map_data["Lat"].mean(),  # Centrado en el centro del vuelo
-            #     longitude=map_data["Long"].mean(),
-            #     zoom=6,  # Ajusta el zoom inicial
-            #     pitch=200,  # Ángulo de inclinación para el efecto 3D
-            #     bearing=0  # Ángulo de rotación
-            # )
+            # Definir la vista inicial del mapa (en términos de latitud, longitud y zoom)
+            view_state = pdk.ViewState(
+                latitude=map_data["Lat"].mean(),  # Centrado en el centro del vuelo
+                longitude=map_data["Long"].mean(),
+                zoom=6,  # Ajusta el zoom inicial
+                pitch=200,  # Ángulo de inclinación para el efecto 3D
+                bearing=0  # Ángulo de rotación
+            )
 
-            # # Crear el deck.gl map con la capa 3D y la vista
-            # r = pdk.Deck(layers=[deckgl_layer], initial_view_state=view_state, tooltip={"text": "{Lat}, {Long}, {AltMSL}"})
+            # Crear el deck.gl map con la capa 3D y la vista
+            r = pdk.Deck(layers=[deckgl_layer], initial_view_state=view_state, tooltip={"text": "{Lat}, {Long}, {AltMSL}"})
 
-            # # Mostrar el mapa en Streamlit
-            # st.pydeck_chart(r)
+            # Mostrar el mapa en Streamlit
+            st.pydeck_chart(r)
 
 
 
@@ -226,7 +226,7 @@ elif opcion == "Análisis Simulador de Vuelo":
 
             # # Asegúrate de tener tus datos correctamente formateados
             # # Aquí, 'Lat', 'Long' y 'AltMSL' son las columnas del DataFrame
-            # data = datos_vuelo[["Lat", "Long", "AltMSL"]]
+            # data = datos_vuelo[["Lat", "Long", "AltRad"]]
 
             # # Crear la visualización 3D del recorrido del vuelo
             # fig = go.Figure()
@@ -234,7 +234,7 @@ elif opcion == "Análisis Simulador de Vuelo":
             # fig.add_trace(go.Scatter3d(
             #     x=data['Long'], 
             #     y=data['Lat'], 
-            #     z=data['AltMSL'],
+            #     z=data['AltRad'],
             #     mode='lines+markers',  # Muestra tanto la línea como los puntos
             #     line=dict(color='blue', width=4),  # Color y grosor de la línea
             #     marker=dict(size=5, color='red', opacity=0.7),  # Tamaño y color de los puntos
