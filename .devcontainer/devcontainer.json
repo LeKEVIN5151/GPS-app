@@ -25,9 +25,13 @@
     "8501": {
       "label": "Application",
       "onAutoForward": "openPreview"
+    },
+    "5000": {
+      "label": "Flask API"
     }
   },
   "forwardPorts": [
-    8501
+    8501,
+    5000
   ]
 }
