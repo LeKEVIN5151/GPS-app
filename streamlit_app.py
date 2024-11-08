@@ -121,8 +121,8 @@ elif opcion == "Análisis Simulador de Vuelo":
             st.subheader("Métricas de vuelo")
             st.write(f"**Tiempo total de vuelo (minutos):** {metricas['Tiempo total de vuelo (minutos)']:.2f}")
             st.write(f"**Velocidad horizontal promedio (m/s):** {metricas['Velocidad horizontal promedio (m/s)']:.2f}")
-            st.write(f"**Altitud máxima (m):** {metricas['Altitud máxima (m)']:.2f}")
-            st.write(f"**Altitud mínima (m):** {metricas['Altitud mínima (m)']:.2f}")
+            st.write(f"**Altitud máxima MSL (m):** {metricas['Altitud máxima (m)']:.2f}")
+            st.write(f"**Altitud mínima MSL (m):** {metricas['Altitud mínima (m)']:.2f}")
             st.write(f"**Velocidad vertical promedio (m/s):** {metricas['Velocidad vertical promedio (m/s)']:.5f}")
             st.write("**Inclinación promedio (Roll, Pitch, Yaw):** "
                     f"({metricas['Inclinación promedio (Roll, Pitch, Yaw)'][0]:.2f}, "
@@ -143,9 +143,18 @@ elif opcion == "Análisis Simulador de Vuelo":
             # Muestra el mapa con puntos más pequeños y de un color personalizado
             st.map(df, size=0.001, color="#0cb8eb")
 
-            st.subheader("Altura MSL vs Tiempo")
+
+            datos_vuelo['Tiempo'] = pd.to_datetime(datos_vuelo['Tiempo'], format='%H:%M:%S') #esto es para acomodar en el eje el tiempo, sino queda bien feo vieja
+
+
+            st.subheader("Altitud (Radioaltímetro) vs. Tiempo")
+            # Usamos 'Tiempo' para el eje X y 'AltMSL' para el eje Y
+            st.line_chart(data=datos_vuelo.set_index('Tiempo')['AltRad'])
+
+
+            st.subheader("Altitud (MSL) vs. Tiempo")
             # Asegúrate de que 'Tiempo' esté en formato datetime
-            datos_vuelo['Tiempo'] = pd.to_datetime(datos_vuelo['Tiempo'], format='%H:%M:%S')
+
 
             # Usamos 'Tiempo' para el eje X y 'AltMSL' para el eje Y
             st.line_chart(data=datos_vuelo.set_index('Tiempo')['AltMSL'])
@@ -182,68 +191,68 @@ elif opcion == "Análisis Simulador de Vuelo":
 
 
 
-            map_data = datos_vuelo[["Lat", "Long", "AltMSL"]]
+            # map_data = datos_vuelo[["Lat", "Long", "AltMSL"]]
 
-            # Crear una capa de puntos en 3D
-            deckgl_layer = pdk.Layer(
-                "PointCloudLayer",
-                map_data,
-                get_position=["Long", "Lat", "AltMSL"],  # Lat, Long, Altitud
-                get_radius=0.1,  # Ajusta el tamaño del punto
-                get_color=[255, 0, 0],  # Color de los puntos (rojo)
-                pickable=True,  # Habilita la selección interactiva de puntos
-            )
+            # # Crear una capa de puntos en 3D
+            # deckgl_layer = pdk.Layer(
+            #     "PointCloudLayer",
+            #     map_data,
+            #     get_position=["Long", "Lat", "AltMSL"],  # Lat, Long, Altitud
+            #     get_radius=0.1,  # Ajusta el tamaño del punto
+            #     get_color=[255, 0, 0],  # Color de los puntos (rojo)
+            #     pickable=True,  # Habilita la selección interactiva de puntos
+            # )
 
-            # Definir la vista inicial del mapa (en términos de latitud, longitud y zoom)
-            view_state = pdk.ViewState(
-                latitude=map_data["Lat"].mean(),  # Centrado en el centro del vuelo
-                longitude=map_data["Long"].mean(),
-                zoom=6,  # Ajusta el zoom inicial
-                pitch=200,  # Ángulo de inclinación para el efecto 3D
-                bearing=0  # Ángulo de rotación
-            )
+            # # Definir la vista inicial del mapa (en términos de latitud, longitud y zoom)
+            # view_state = pdk.ViewState(
+            #     latitude=map_data["Lat"].mean(),  # Centrado en el centro del vuelo
+            #     longitude=map_data["Long"].mean(),
+            #     zoom=6,  # Ajusta el zoom inicial
+            #     pitch=200,  # Ángulo de inclinación para el efecto 3D
+            #     bearing=0  # Ángulo de rotación
+            # )
 
-            # Crear el deck.gl map con la capa 3D y la vista
-            r = pdk.Deck(layers=[deckgl_layer], initial_view_state=view_state, tooltip={"text": "{Lat}, {Long}, {AltMSL}"})
+            # # Crear el deck.gl map con la capa 3D y la vista
+            # r = pdk.Deck(layers=[deckgl_layer], initial_view_state=view_state, tooltip={"text": "{Lat}, {Long}, {AltMSL}"})
 
-            # Mostrar el mapa en Streamlit
-            st.pydeck_chart(r)
-
-
+            # # Mostrar el mapa en Streamlit
+            # st.pydeck_chart(r)
 
 
 
 
 
-            # Asegúrate de tener tus datos correctamente formateados
-            # Aquí, 'Lat', 'Long' y 'AltMSL' son las columnas del DataFrame
-            data = datos_vuelo[["Lat", "Long", "AltMSL"]]
 
-            # Crear la visualización 3D del recorrido del vuelo
-            fig = go.Figure()
 
-            fig.add_trace(go.Scatter3d(
-                x=data['Long'], 
-                y=data['Lat'], 
-                z=data['AltMSL'],
-                mode='lines+markers',  # Muestra tanto la línea como los puntos
-                line=dict(color='blue', width=4),  # Color y grosor de la línea
-                marker=dict(size=5, color='red', opacity=0.7),  # Tamaño y color de los puntos
-            ))
+            # # Asegúrate de tener tus datos correctamente formateados
+            # # Aquí, 'Lat', 'Long' y 'AltMSL' son las columnas del DataFrame
+            # data = datos_vuelo[["Lat", "Long", "AltMSL"]]
 
-            # Configuración del diseño para visualización 3D
-            fig.update_layout(
-                scene=dict(
-                    xaxis_title='Longitud',
-                    yaxis_title='Latitud',
-                    zaxis_title='Altitud (MSL)',
-                ),
-                title='Recorrido del Vuelo en 3D',
-                margin=dict(l=0, r=0, b=0, t=40),
-            )
+            # # Crear la visualización 3D del recorrido del vuelo
+            # fig = go.Figure()
 
-            # Mostrar el gráfico en Streamlit
-            st.plotly_chart(fig)
+            # fig.add_trace(go.Scatter3d(
+            #     x=data['Long'], 
+            #     y=data['Lat'], 
+            #     z=data['AltMSL'],
+            #     mode='lines+markers',  # Muestra tanto la línea como los puntos
+            #     line=dict(color='blue', width=4),  # Color y grosor de la línea
+            #     marker=dict(size=5, color='red', opacity=0.7),  # Tamaño y color de los puntos
+            # ))
+
+            # # Configuración del diseño para visualización 3D
+            # fig.update_layout(
+            #     scene=dict(
+            #         xaxis_title='Longitud',
+            #         yaxis_title='Latitud',
+            #         zaxis_title='Altitud (MSL)',
+            #     ),
+            #     title='Recorrido del Vuelo en 3D',
+            #     margin=dict(l=0, r=0, b=0, t=40),
+            # )
+
+            # # Mostrar el gráfico en Streamlit
+            # st.plotly_chart(fig)
 
 
 
