@@ -1,9 +1,7 @@
 import serial
 import pynmea2
 from flask import Flask, jsonify
-import time
 from threading import Thread
-import pyserial
 
 app = Flask(__name__)
 

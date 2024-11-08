@@ -1,8 +1,13 @@
 streamlit
 pynmea2
 folium
-streamlit_folium
+streamlit-folium
 pyserial
-serial
 requests
-flask
+pandas
+geopy
+#datetime  # datetime es parte de la librería estándar de Python y no requiere instalación
+seaborn
+plotly
+matplotlib
+pydeck
