@@ -1,3 +1,0 @@
-pyserial
-pynmea2
-Flask
