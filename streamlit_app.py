@@ -43,7 +43,7 @@ def streamlit_ui():
 
 # Función para ejecutar Flask en un hilo separado
 def run_flask():
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5001)
 
 # Inicia Flask en un hilo
 flask_thread = Thread(target=run_flask, daemon=True)
