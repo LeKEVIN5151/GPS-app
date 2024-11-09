@@ -11,3 +11,4 @@ seaborn
 plotly
 matplotlib
 pydeck
+Flask
