@@ -85,7 +85,7 @@ def streamlit_ui():
 # Ejecutar Flask en un hilo separado y luego Streamlit
 if __name__ == "__main__":
     # Iniciar el servidor Flask en un hilo aparte
-    #flask_thread = Thread(target=iniciar_flask)
+    flask_thread = Thread(target=iniciar_flask)
    #flask_thread.start()
     
     # Iniciar la interfaz de usuario de Streamlit
