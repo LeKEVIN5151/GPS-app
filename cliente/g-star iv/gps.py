@@ -3,6 +3,7 @@ import pynmea2
 from flask import Flask, jsonify
 import time
 from threading import Thread
+import requests
 
 app = Flask(__name__)
 
@@ -25,7 +26,17 @@ def leer_datos_gps():
                     if hasattr(msg, 'latitude') and hasattr(msg, 'longitude'):
                         gps_data["latitude"] = msg.latitude
                         gps_data["longitude"] = msg.longitude
-                        print(f"Latitud: {gps_data['latitude']}, Longitud: {gps_data['longitude']}")  # Imprime coordenadas
+                        #print(f"Latitud: {gps_data['latitude']}, Longitud: {gps_data['longitude']}")  # Imprime coordenadas
+                        
+                            # Enviar datos al servidor Streamlit
+                        try:
+                            response = requests.post("https://gpsunrc.streamlit.app/endpoint", json=gps_data)
+                            if response.status_code == 200:
+                                print("Datos enviados correctamente.")
+                            else:
+                                print(f"Error al enviar datos: {response.status_code}")
+                        except requests.exceptions.RequestException as e:
+                            print(f"Error de conexión: {e}")
 
                 except pynmea2.ParseError:
                     print("Error al parsear la trama NMEA.")
