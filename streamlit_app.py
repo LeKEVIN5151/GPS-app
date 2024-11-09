@@ -14,6 +14,26 @@ import requests
 # Inicializa la app Flask
 app = Flask(__name__)
 
+# Endpoint en Flask para recibir datos
+@app.route('/endpoint', methods=['POST'])
+def recibir_datos():
+    data = request.get_json()
+    
+    # Guarda los datos en el estado de Streamlit
+    latitude = data.get("latitude", None)
+    longitude = data.get("longitude", None)
+    
+    if latitude is not None and longitude is not None:
+        st.session_state.latitude = latitude
+        st.session_state.longitude = longitude
+        return jsonify({"status": "received", "latitude": latitude, "longitude": longitude})
+    
+    return jsonify({"status": "error", "message": "No valid data received"}), 400
+
+# Ejecutar Flask en un hilo
+def run_flask():
+    app.run(port=5000, debug=False, use_reloader=False)
+
 # Interfaz principal de Streamlit
 def streamlit_ui():
     st.sidebar.title("Selecciona el servicio")
@@ -82,18 +102,7 @@ def streamlit_ui():
             folium.Marker([lat, lon], tooltip="Ubicación Actual").add_to(map_location)
             st_folium(map_location, width=700, height=500)
 
-# Endpoint en Flask para recibir datos
-@app.route('/location', methods=['POST'])
-def recibir_datos():
-    data = request.get_json()
-    st.session_state.latitude = data.get("latitude", 0.0)
-    st.session_state.longitude = data.get("longitude", 0.0)
-    return jsonify({"status": "received"})
-
-# Ejecutar Flask en un hilo
-def run_flask():
-    app.run(port=5000, debug=False, use_reloader=False)
-
+# Ejecutar Flask y Streamlit
 if __name__ == "__main__":
     flask_thread = Thread(target=run_flask)
     flask_thread.start()
