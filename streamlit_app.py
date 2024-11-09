@@ -2,37 +2,9 @@ import streamlit as st
 import pynmea2
 import folium
 from streamlit_folium import st_folium
-import serial
-from flask import Flask, request, jsonify
-from threading import Thread
 import pandas as pd
 from geopy.distance import geodesic
-import plotly.express as px
-import pydeck as pdk
 import requests
-
-# Inicializa la app Flask
-app = Flask(__name__)
-
-# Endpoint en Flask para recibir datos
-@app.route('/endpoint', methods=['POST'])
-def recibir_datos():
-    data = request.get_json()
-    
-    # Guarda los datos en el estado de Streamlit
-    latitude = data.get("latitude", None)
-    longitude = data.get("longitude", None)
-    
-    if latitude is not None and longitude is not None:
-        st.session_state.latitude = latitude
-        st.session_state.longitude = longitude
-        return jsonify({"status": "received", "latitude": latitude, "longitude": longitude})
-    
-    return jsonify({"status": "error", "message": "No valid data received"}), 400
-
-# Ejecutar Flask en un hilo
-def run_flask():
-    app.run(port=5000, debug=False, use_reloader=False)
 
 # Interfaz principal de Streamlit
 def streamlit_ui():
@@ -81,10 +53,10 @@ def streamlit_ui():
     # Datos GPS G-STAR IV
     elif opcion == "Ubicación G-STAR IV":
         st.header("Ubicación G-STAR IV")
-        API_URL = "http://0.0.0.0:5000/location"
+        API_URL = "https://gpsunrc.streamlit.app"  # La URL pública de la API de Streamlit
         def obtener_datos_gps():
             try:
-                response = requests.get(API_URL)
+                response = requests.get(f"{API_URL}/location")  # Asegúrate que esta ruta existe en tu servidor
                 if response.status_code == 200:
                     data = response.json()
                     return data.get("latitude"), data.get("longitude")
@@ -102,8 +74,6 @@ def streamlit_ui():
             folium.Marker([lat, lon], tooltip="Ubicación Actual").add_to(map_location)
             st_folium(map_location, width=700, height=500)
 
-# Ejecutar Flask y Streamlit
+# Ejecutar Streamlit
 if __name__ == "__main__":
-    flask_thread = Thread(target=run_flask)
-    flask_thread.start()
     streamlit_ui()
