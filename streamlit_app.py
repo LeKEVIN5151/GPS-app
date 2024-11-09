@@ -2,25 +2,11 @@ import streamlit as st
 import pynmea2
 import folium
 from streamlit_folium import st_folium
+import pandas as pd
+from geopy.distance import geodesic
 import requests
-from flask import Flask, request, jsonify
-from threading import Thread
 
-app = Flask(__name__)
-
-# Variable global para almacenar las coordenadas GPS
-gps_data = {"latitude": None, "longitude": None}
-
-# Función para recibir datos GPS desde el cliente
-@app.route('/receive_gps', methods=['POST'])
-def receive_gps():
-    global gps_data
-    data = request.json
-    gps_data["latitude"] = data.get("latitude")
-    gps_data["longitude"] = data.get("longitude")
-    return jsonify({"message": "Datos recibidos correctamente"}), 200
-
-# Interfaz de Streamlit para mostrar la ubicación
+# Interfaz principal de Streamlit
 def streamlit_ui():
     st.sidebar.title("Selecciona el servicio")
     opcion = st.sidebar.radio(
@@ -28,27 +14,66 @@ def streamlit_ui():
         ["Ubicación mediante trama NMEA", "Análisis Simulador de Vuelo", "Cálculo de área", "Ubicación Usuario", "Ubicación G-STAR IV"]
     )
 
-    # Mostrar la ubicación recibida por el cliente
-    if opcion == "Ubicación Usuario":
-        st.header("Ubicación Usuario")
-        if gps_data["latitude"] and gps_data["longitude"]:
-            lat, lon = gps_data["latitude"], gps_data["longitude"]
+    # Procesamiento NMEA
+    if opcion == "Ubicación mediante trama NMEA":
+        st.header("Ubicación mediante trama NMEA")
+        nmea_input = st.text_input("Ingresa la trama NMEA")
+        if nmea_input:
+            try:
+                msg = pynmea2.parse(nmea_input)
+                lat, lon = msg.latitude, msg.longitude
+                st.write(f"Latitud: {lat}")
+                st.write(f"Longitud: {lon}")
+                map_location = folium.Map(location=[lat, lon], zoom_start=15)
+                folium.Marker([lat, lon], tooltip="Ubicación actual").add_to(map_location)
+                st_folium(map_location, width=900, height=700)
+            except Exception as e:
+                st.error(f"Error procesando la trama NMEA: {e}")
+
+    # Análisis de simulador de vuelo
+    elif opcion == "Análisis Simulador de Vuelo":
+        st.header("Análisis Simulador de Vuelo")
+        archivo = st.file_uploader("Selecciona un archivo .txt", type="txt")
+        if archivo:
+            datos_vuelo = pd.read_csv(archivo, sep=';', skiprows=1,
+                                      names=["Tiempo", "Lat", "Long", "AltMSL", "AltRad", "Roll", "Pitch", "Yaw"])
+            # Cálculos de métricas
+            tiempo_total = (pd.to_datetime(datos_vuelo['Tiempo'].iloc[-1]) - pd.to_datetime(datos_vuelo['Tiempo'].iloc[0])).total_seconds() / 60
+            distancias = [geodesic((datos_vuelo['Lat'][i], datos_vuelo['Long'][i]), 
+                                   (datos_vuelo['Lat'][i+1], datos_vuelo['Long'][i+1])).meters 
+                          for i in range(len(datos_vuelo) - 1)]
+            velocidad_horizontal = sum(distancias) / max(tiempo_total, 1)
+            st.write(f"Tiempo total de vuelo (min): {tiempo_total:.2f}")
+            st.write(f"Velocidad horizontal promedio (m/s): {velocidad_horizontal:.2f}")
+            
+            # Mapa de recorrido
+            df = pd.DataFrame({'lat': datos_vuelo['Lat'], 'lon': datos_vuelo['Long']})
+            st.map(df, size=0.001)
+
+    # Datos GPS G-STAR IV
+    elif opcion == "Ubicación G-STAR IV":
+        st.header("Ubicación G-STAR IV")
+        API_URL = "https://gpsunrc.streamlit.app"  # La URL pública de la API de Streamlit
+        def obtener_datos_gps():
+            try:
+                response = requests.get(f"{API_URL}/location")  # Asegúrate que esta ruta existe en tu servidor
+                if response.status_code == 200:
+                    data = response.json()
+                    return data.get("latitude"), data.get("longitude")
+                else:
+                    st.error("Error al obtener datos de la API.")
+            except requests.exceptions.RequestException as e:
+                st.error(f"Error de conexión: {e}")
+            return None, None
+
+        lat, lon = obtener_datos_gps()
+        if lat and lon:
             st.write(f"Latitud: {lat}")
             st.write(f"Longitud: {lon}")
             map_location = folium.Map(location=[lat, lon], zoom_start=15)
-            folium.Marker([lat, lon], tooltip="Ubicación actual").add_to(map_location)
-            st_folium(map_location, width=900, height=700)
-        else:
-            st.write("Esperando datos del GPS...")
+            folium.Marker([lat, lon], tooltip="Ubicación Actual").add_to(map_location)
+            st_folium(map_location, width=700, height=500)
 
-# Función para ejecutar Flask en un hilo separado
-def run_flask():
-    app.run(host="0.0.0.0", port=5555)
-
-# Inicia Flask en un hilo
-flask_thread = Thread(target=run_flask, daemon=True)
-flask_thread.start()
-
-# Ejecuta Streamlit
+# Ejecutar Streamlit
 if __name__ == "__main__":
     streamlit_ui()
