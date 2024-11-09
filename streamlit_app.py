@@ -24,8 +24,8 @@ def recibir_datos_gps():
     return jsonify({"status": "Error en los datos enviados"}), 400
 
 # Iniciar Flask en un hilo separado
-def iniciar_flask():
-    app.run(host='0.0.0.0', port=5001)
+#def iniciar_flask():
+#    app.run(host='0.0.0.0', port=6000)
 
 # Interfaz principal de Streamlit
 def streamlit_ui():
