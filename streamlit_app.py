@@ -87,7 +87,7 @@ if __name__ == "__main__":
     # Iniciar el servidor Flask en un hilo aparte
     #flask_thread = Thread(target=iniciar_flask)
     #flask_thread.start()
-    app.run(host='0.0.0.0', port=8501)
+    app.run(host='0.0.0.0', port=6000)
     
     # Iniciar la interfaz de usuario de Streamlit
     streamlit_ui()
