@@ -1,0 +1,5 @@
+serial
+pynmea2
+Flask
+Thread
+pyserial
