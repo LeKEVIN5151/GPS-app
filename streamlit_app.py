@@ -20,27 +20,26 @@ def recibir_datos_gps():
     if data:
         gps_data["latitude"] = data.get("latitude")
         gps_data["longitude"] = data.get("longitude")
+        print("Datos GPS recibidos:", gps_data)  # Depuración
         return jsonify({"status": "Datos recibidos correctamente"}), 200
+    print("Error en los datos recibidos")  # Depuración
     return jsonify({"status": "Error en los datos enviados"}), 400
 
 # Iniciar Flask en un hilo separado
 def iniciar_flask():
-    try:
-        print("Iniciando servidor Flask...")  # Depuración
-        app.run(host='0.0.0.0', port=6000)
-        print("Servidor Flask iniciado")  # Depuración
-    except OSError as e:
-        print(f"Error al iniciar Flask: {e}")
+    print("Iniciando servidor Flask...")  # Depuración
+    app.run(host='0.0.0.0', port=6000)
+    print("Servidor Flask iniciado")  # Depuración
 
 # Interfaz principal de Streamlit
 def streamlit_ui():
+    print("Iniciando la interfaz de usuario de Streamlit...")  # Depuración
     st.sidebar.title("Selecciona el servicio")
     opcion = st.sidebar.radio(
         "Servicios",
         ["Ubicación mediante trama NMEA", "Análisis Simulador de Vuelo", "Ubicación G-STAR IV"]
     )
 
-    # Procesamiento NMEA
     if opcion == "Ubicación mediante trama NMEA":
         st.header("Ubicación mediante trama NMEA")
         nmea_input = st.text_input("Ingresa la trama NMEA")
@@ -56,7 +55,6 @@ def streamlit_ui():
             except Exception as e:
                 st.error(f"Error procesando la trama NMEA: {e}")
 
-    # Análisis de simulador de vuelo
     elif opcion == "Análisis Simulador de Vuelo":
         st.header("Análisis Simulador de Vuelo")
         archivo = st.file_uploader("Selecciona un archivo .txt", type="txt")
@@ -74,7 +72,6 @@ def streamlit_ui():
             df = pd.DataFrame({'lat': datos_vuelo['Lat'], 'lon': datos_vuelo['Long']})
             st.map(df, size=0.001)
 
-    # Datos GPS G-STAR IV
     elif opcion == "Ubicación G-STAR IV":
         st.header("Ubicación G-STAR IV")
         lat, lon = gps_data.get("latitude"), gps_data.get("longitude")
@@ -86,11 +83,12 @@ def streamlit_ui():
             st_folium(map_location, width=700, height=500)
         else:
             st.write("Aún no se han recibido datos del cliente.")
+    print("Interfaz de usuario de Streamlit cargada")  # Depuración
 
 # Ejecutar Flask en un hilo separado y luego Streamlit
 if __name__ == "__main__":
-    # Iniciar el servidor Flask en un hilo aparte
     print("Ejecutando el script principal...")  # Depuración
+    # Iniciar el servidor Flask en un hilo aparte
     flask_thread = Thread(target=iniciar_flask)
     flask_thread.start()
     
