@@ -25,7 +25,7 @@ def recibir_datos_gps():
 
 # Iniciar Flask en un hilo separado
 def iniciar_flask():
-    app.run(host='0.0.0.0', port=6000)
+    app.run(host='0.0.0.0', port=8501)
 
 # Interfaz principal de Streamlit
 def streamlit_ui():
