@@ -268,8 +268,7 @@ elif opcion == "Ubicación Usuario":
 
 # Sección "Ubicación G-STAR IV"
 elif opcion == "Ubicación G-STAR IV":
-    #API_URL = "http://0.0.0.0:5000/location"  # Cambia a tu dominio y puerto si necesario
-    API_URL = "https://gpsunrc.streamlit.app/:5000"
+    API_URL = "http://0.0.0.0:5000/location"  # Cambia a tu dominio y puerto si necesario
 
     def obtener_datos_gps():
         try:
