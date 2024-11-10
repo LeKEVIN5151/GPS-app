@@ -25,7 +25,12 @@ def recibir_datos_gps():
 
 # Iniciar Flask en un hilo separado
 def iniciar_flask():
-    app.run(host='0.0.0.0', port=6000)
+    try:
+        print("Iniciando servidor Flask...")  # Depuración
+        app.run(host='0.0.0.0', port=6000)
+        print("Servidor Flask iniciado")  # Depuración
+    except OSError as e:
+        print(f"Error al iniciar Flask: {e}")
 
 # Interfaz principal de Streamlit
 def streamlit_ui():
@@ -85,8 +90,10 @@ def streamlit_ui():
 # Ejecutar Flask en un hilo separado y luego Streamlit
 if __name__ == "__main__":
     # Iniciar el servidor Flask en un hilo aparte
+    print("Ejecutando el script principal...")  # Depuración
     flask_thread = Thread(target=iniciar_flask)
     flask_thread.start()
     
     # Iniciar la interfaz de usuario de Streamlit
     streamlit_ui()
+    print("Script principal finalizado")  # Depuración
