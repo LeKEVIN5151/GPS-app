@@ -1,31 +1,58 @@
 import streamlit as st
 import pynmea2
 import folium
-from streamlit_folium import st_folium
-import serial
-from threading import Thread
-import time
+from streamlit_folium import st_folium 
 import requests
 import pandas as pd
 from geopy.distance import geodesic
 from datetime import datetime
-import seaborn as sns
-import plotly.express as px
-import matplotlib.pyplot as plt
 import pydeck as pdk
-import plotly.graph_objects as go
-
-
-
-# Título principal de la aplicación
-#st.title("Aplicación de Servicios")
+from PIL import Image
 
 # Menú lateral para elegir la sección
 st.sidebar.title("Selecciona el servicio")
-opcion = st.sidebar.radio("Servicios", ["Ubicación mediante trama NMEA", "Análisis Simulador de Vuelo", "Cálculo de área", "Ubicación Usuario", "Ubicación G-STAR IV"])
+opcion = st.sidebar.radio("Servicios", ["Home","Ubicación mediante trama NMEA", "Análisis Simulador de Vuelo", "Ubicación G-STAR IV"])
+
+if opcion == "Home":
+    # Cargar imágenes (asegúrate de tener los archivos en la carpeta de tu proyecto o usar una URL)
+    logo_universidad = Image.open("images/logounrc_2.png")
+    logo_facultad = Image.open("images/logoing.png")
+
+        # Mostrar logos centrados y a la misma altura
+    col1, col2, col3, col4 = st.columns([1, 0.1, 0.2, 0.2])  # Crear cuatro columnas de igual ancho
+
+    with col1:
+        st.title("Aplicación de Servicios GPS")
+
+    with col3:
+        st.image(logo_universidad, width=200, use_container_width=True)
+    with col4:
+        st.image(logo_facultad, width=200, use_container_width=True)
+
+    with col2:
+        st.write(" ")
+
+    st.write("""
+        Esta aplicación ofrece diversos servicios relacionados con la ubicación GPS y el análisis de datos de vuelo.
+        Desarrollada como parte de un proyecto académico en colaboración con la Facultad de Ingeniería y la Universidad, 
+        tiene como objetivo facilitar el acceso a datos geoespaciales en tiempo real.
+    """)
+
+    gps = Image.open("images/gps.png")
+    st.image(gps, width=1000)
+
+    st.write("""
+
+        ## Alumnos:
+        - **Buten Andrés Benjamín**
+        - **Demaio Ignacio Laureano**
+        - **Haponiuk Kevin**
+
+        **Sistemas de Radionavegación 2024**
+    """)
 
 # Sección "Ubicación mediante trama NMEA"
-if opcion == "Ubicación mediante trama NMEA":
+elif opcion == "Ubicación mediante trama NMEA":
     st.header("Ubicación mediante trama NMEA")
     # Entrada de la trama NMEA
     nmea_input = st.text_input("Ingresa la trama NMEA")
@@ -50,7 +77,6 @@ if opcion == "Ubicación mediante trama NMEA":
 
         except Exception as e:
             st.error(f"Error procesando la trama NMEA: {e}")
-
 
 # Sección "Análisis Simulador de Vuelo"
 elif opcion == "Análisis Simulador de Vuelo":
@@ -159,13 +185,9 @@ elif opcion == "Análisis Simulador de Vuelo":
             # Usamos 'Tiempo' para el eje X y 'AltMSL' para el eje Y
             st.line_chart(data=datos_vuelo.set_index('Tiempo')['AltMSL'])
 
-
-
             st.subheader("Velocidad vertical vs Tiempo")
             datos_vuelo['Velocidad_Vertical'] = datos_vuelo['AltMSL'].diff().fillna(0)
             st.line_chart(data=datos_vuelo.set_index('Tiempo')['Velocidad_Vertical'])
-
-
 
             st.subheader("Velocidad horizontal vs Tiempo")
             velocidades = [
@@ -177,19 +199,12 @@ elif opcion == "Análisis Simulador de Vuelo":
             datos_vuelo['Velocidad_Horizontal'] = velocidades
             st.line_chart(data=datos_vuelo.set_index('Tiempo')['Velocidad_Horizontal'])
 
-            
-
             # Crear un DataFrame con los datos de inclinación y tiempo
             chart_data = datos_vuelo[["Tiempo", "Roll", "Pitch", "Yaw"]]
 
             # Asegurarse de que la columna 'Tiempo' sea un índice adecuado para el gráfico
             chart_data["Tiempo"] = pd.to_datetime(chart_data["Tiempo"], format='%H:%M:%S')
             chart_data.set_index("Tiempo", inplace=True)
-
-
-
-
-
 
             map_data = datos_vuelo[["Lat", "Long", "AltMSL"]]
 
@@ -217,54 +232,6 @@ elif opcion == "Análisis Simulador de Vuelo":
 
             # Mostrar el mapa en Streamlit
             st.pydeck_chart(r)
-
-
-
-
-
-
-
-            # # Asegúrate de tener tus datos correctamente formateados
-            # # Aquí, 'Lat', 'Long' y 'AltMSL' son las columnas del DataFrame
-            # data = datos_vuelo[["Lat", "Long", "AltRad"]]
-
-            # # Crear la visualización 3D del recorrido del vuelo
-            # fig = go.Figure()
-
-            # fig.add_trace(go.Scatter3d(
-            #     x=data['Long'], 
-            #     y=data['Lat'], 
-            #     z=data['AltRad'],
-            #     mode='lines+markers',  # Muestra tanto la línea como los puntos
-            #     line=dict(color='blue', width=4),  # Color y grosor de la línea
-            #     marker=dict(size=5, color='red', opacity=0.7),  # Tamaño y color de los puntos
-            # ))
-
-            # # Configuración del diseño para visualización 3D
-            # fig.update_layout(
-            #     scene=dict(
-            #         xaxis_title='Longitud',
-            #         yaxis_title='Latitud',
-            #         zaxis_title='Altitud (MSL)',
-            #     ),
-            #     title='Recorrido del Vuelo en 3D',
-            #     margin=dict(l=0, r=0, b=0, t=40),
-            # )
-
-            # # Mostrar el gráfico en Streamlit
-            # st.plotly_chart(fig)
-
-
-
-# Sección "Cálculo de área"
-elif opcion == "Cálculo de área":
-    st.header("Cálculo de área")
-    st.write("Aquí puedes añadir el cálculo de área.")
-
-# Sección "Ubicación Usuario"
-elif opcion == "Ubicación Usuario":
-    st.header("Ubicación Usuario")
-    st.write("Aquí puedes añadir el análisis del simulador de vuelo.")
 
 # Sección "Ubicación G-STAR IV"
 elif opcion == "Ubicación G-STAR IV":
